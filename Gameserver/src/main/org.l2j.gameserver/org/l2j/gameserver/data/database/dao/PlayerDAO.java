@@ -45,10 +45,10 @@ public interface PlayerDAO extends DAO<PlayerData> {
     @Query("SELECT * FROM characters WHERE charId = :objectId:")
     PlayerData findById(int objectId);
 
-    @Query("UPDATE characters SET clanid=0, clan_privs=0, wantspeace=0, subpledge=0, title='', lvl_joined_academy=0, apprentice=0, sponsor=0, clan_join_expiry_time=0, clan_create_expiry_time=0 WHERE characters.clanid > 0 AND characters.clanid NOT IN (SELECT clan_id FROM clan_data)")
+    @Query("UPDATE characters SET clanid=0, clan_privs=0, wantspeace=0, title='', apprentice=0, sponsor=0, clan_join_expiry_time=0, clan_create_expiry_time=0 WHERE characters.clanid > 0 AND characters.clanid NOT IN (SELECT clan_id FROM clan_data)")
     void resetClanInfoOfNonexistentClan();
 
-    @Query("UPDATE characters SET clanid=0, clan_privs=0, wantspeace=0, subpledge=0, title='', lvl_joined_academy=0, apprentice=0, sponsor=0, clan_join_expiry_time=:clanJoinExpiryTime:, clan_create_expiry_time=:clanCreateExpiryTime: WHERE charId = :playerId:")
+    @Query("UPDATE characters SET clanid=0, clan_privs=0, wantspeace=0, title='', apprentice=0, sponsor=0, clan_join_expiry_time=:clanJoinExpiryTime:, clan_create_expiry_time=:clanCreateExpiryTime: WHERE charId = :playerId:")
     void deleteClanInfoOfMember(int playerId, long clanJoinExpiryTime, long clanCreateExpiryTime);
 
     @Query("DELETE FROM character_skills_save WHERE restore_type = 1 AND systime <= :timestamp:")
@@ -129,8 +129,12 @@ public interface PlayerDAO extends DAO<PlayerData> {
     @Query("SELECT charId, char_name, accesslevel FROM characters")
     void withPlayersDataDo(Consumer<ResultSet> action);
 
-    @Query("SELECT char_name,level,classid,charId,title,power_grade,subpledge,apprentice,sponsor,sex,race FROM characters WHERE clanid=:clanId:")
-    List<PlayerData> findClanMembers(int clanId);
+    @Query("""
+          SELECT c.char_name, c.level, c.classid, c.charId, c.title, c.power_grade, c.apprentice, c.sponsor, c.sex, c.race, cm.last_reputation_level
+          FROM characters c LEFT JOIN clan_members cm ON c.charId = cm.player_id AND c.clanid = cm.clan_id
+          WHERE clanid=:clanId:
+          """)
+    List<ClanMember> findClanMembers(int clanId);
 
     @Query("UPDATE characters SET apprentice=0 WHERE apprentice=:playerId:")
     void deleteApprentice(int playerId);
@@ -213,9 +217,6 @@ public interface PlayerDAO extends DAO<PlayerData> {
     @Query("DELETE FROM character_tpbookmark WHERE charId=:playerId: AND Id=:id:")
     void deleteTeleportBookMark(int playerId, int id);
 
-    @Query("UPDATE characters SET subpledge=:pledgeType: WHERE charId=:playerId:")
-    void updateSubpledge(int playerId, int pledgeType);
-
     @Query("UPDATE characters SET power_grade=:powerGrade: WHERE charId=:playerId:")
     void updatePowerGrade(int playerId, int powerGrade);
 
@@ -259,4 +260,7 @@ public interface PlayerDAO extends DAO<PlayerData> {
 
     @Query("SELECT rec_have, rec_left FROM character_reco_bonus WHERE charId = :playerId:")
     IntKeyIntValue findRecommends(int playerId);
+
+    @Query("INSERT INTO clan_members (clan_id, player_id, last_reputation_level) VALUES (:clanId:, :playerId:, :level:) AS v ON DUPLICATE KEY UPDATE last_reputation_level = v.last_reputation_level")
+    void saveLastReputationLevel(int clanId, int playerId, byte level);
 }

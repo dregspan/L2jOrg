@@ -27,13 +27,12 @@ import org.l2j.gameserver.model.stats.BaseStats;
 import org.l2j.gameserver.model.stats.IStatsFunction;
 import org.l2j.gameserver.model.stats.Stat;
 import org.l2j.gameserver.settings.CharacterSettings;
-import org.l2j.gameserver.world.zone.ZoneManager;
+import org.l2j.gameserver.world.zone.ZoneEngine;
 import org.l2j.gameserver.world.zone.ZoneType;
 import org.l2j.gameserver.world.zone.type.SwampZone;
 
 import java.util.Optional;
 
-import static org.l2j.commons.configuration.Configurator.getSettings;
 import static org.l2j.gameserver.util.GameUtils.isPlayable;
 import static org.l2j.gameserver.util.GameUtils.isPlayer;
 
@@ -58,7 +57,7 @@ public class SpeedFinalizer implements IStatsFunction {
             baseValue += bonusDex;
         }
 
-        return validateValue(creature, Stat.defaultValue(creature, stat, baseValue), 1, getSettings(CharacterSettings.class).maxRunSpeed());
+        return validateValue(creature, Stat.defaultValue(creature, stat, baseValue), 1, CharacterSettings.maxRunSpeed());
     }
 
     @Override
@@ -87,7 +86,7 @@ public class SpeedFinalizer implements IStatsFunction {
             }
         }
         if (isPlayable(creature) && creature.isInsideZone(ZoneType.SWAMP)) {
-            final SwampZone zone = ZoneManager.getInstance().getZone(creature, SwampZone.class);
+            final SwampZone zone = ZoneEngine.getInstance().findFirstZone(creature, SwampZone.class);
             if (zone != null) {
                 baseValue *= zone.getMoveBonus();
             }

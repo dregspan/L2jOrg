@@ -27,7 +27,7 @@ import org.l2j.gameserver.enums.PrivateStoreType;
 import org.l2j.gameserver.handler.CommunityBoardHandler;
 import org.l2j.gameserver.model.actor.instance.Player;
 import org.l2j.gameserver.model.holders.SellBuffHolder;
-import org.l2j.gameserver.model.item.ItemTemplate;
+import org.l2j.gameserver.engine.item.ItemTemplate;
 import org.l2j.gameserver.network.serverpackets.ExPrivateStoreSetWholeMsg;
 import org.l2j.gameserver.settings.ServerSettings;
 import org.l2j.gameserver.util.GameUtils;
@@ -43,8 +43,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.l2j.commons.configuration.Configurator.getSettings;
 
 /**
  * Sell Buffs Manager
@@ -63,7 +61,7 @@ public final class SellBuffsManager extends GameXmlReader {
 
     @Override
     protected Path getSchemaFilePath() {
-        return getSettings(ServerSettings.class).dataPackDirectory().resolve("data/xsd/SellBuffData.xsd");
+        return ServerSettings.dataPackDirectory().resolve("data/xsd/SellBuffData.xsd");
     }
 
     @Override

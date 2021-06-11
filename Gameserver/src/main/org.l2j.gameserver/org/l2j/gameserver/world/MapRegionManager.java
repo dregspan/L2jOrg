@@ -18,7 +18,7 @@
  */
 package org.l2j.gameserver.world;
 
-import org.l2j.gameserver.data.xml.impl.ClanHallManager;
+import org.l2j.gameserver.engine.clan.clanhall.ClanHallEngine;
 import org.l2j.gameserver.instancemanager.CastleManager;
 import org.l2j.gameserver.model.Location;
 import org.l2j.gameserver.model.TeleportWhereType;
@@ -33,7 +33,7 @@ import org.l2j.gameserver.model.interfaces.ILocational;
 import org.l2j.gameserver.settings.ServerSettings;
 import org.l2j.gameserver.util.GameXmlReader;
 import org.l2j.gameserver.util.MathUtil;
-import org.l2j.gameserver.world.zone.ZoneManager;
+import org.l2j.gameserver.world.zone.ZoneEngine;
 import org.l2j.gameserver.world.zone.type.RespawnZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,6 @@ import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.l2j.commons.configuration.Configurator.getSettings;
 import static org.l2j.commons.util.Util.zeroIfNullOrElse;
 import static org.l2j.gameserver.util.GameUtils.isPlayer;
 
@@ -70,7 +69,7 @@ public final class MapRegionManager extends GameXmlReader {
 
     @Override
     protected Path getSchemaFilePath() {
-        return getSettings(ServerSettings.class).dataPackDirectory().resolve("data/mapregion/map-region.xsd");
+        return ServerSettings.dataPackDirectory().resolve("data/mapregion/map-region.xsd");
     }
 
     @Override
@@ -185,7 +184,7 @@ public final class MapRegionManager extends GameXmlReader {
                 }
             }
 
-            final RespawnZone zone = ZoneManager.getInstance().getZone(player, RespawnZone.class);
+            final RespawnZone zone = ZoneEngine.getInstance().findFirstZone(player, RespawnZone.class);
             if (nonNull(zone)) {
                 return getRestartRegion(player, zone.getRespawnPoint(player)).getSpawnLoc();
             }
@@ -202,7 +201,7 @@ public final class MapRegionManager extends GameXmlReader {
 
     private Location getChaoticLocation(Player player) {
         try {
-            final RespawnZone zone = ZoneManager.getInstance().getZone(player, RespawnZone.class);
+            final RespawnZone zone = ZoneEngine.getInstance().findFirstZone(player, RespawnZone.class);
             if(nonNull(zone)) {
                 return getRestartRegion(player, zone.getRespawnPoint(player)).getChaoticSpawnLoc();
             }
@@ -239,9 +238,9 @@ public final class MapRegionManager extends GameXmlReader {
             return null;
         }
 
-        var clanHall = ClanHallManager.getInstance().getClanHallByClan(player.getClan());
+        var clanHall = ClanHallEngine.getInstance().getClanHallByClan(player.getClan());
         if ((nonNull(clanHall))) {
-            return clanHall.getOwnerLocation();
+            return clanHall.getRestartPoint();
         }
         return null;
     }

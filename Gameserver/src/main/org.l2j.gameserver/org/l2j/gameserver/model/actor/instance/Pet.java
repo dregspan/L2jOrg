@@ -50,7 +50,7 @@ import org.l2j.gameserver.model.actor.stat.PetStats;
 import org.l2j.gameserver.model.actor.templates.NpcTemplate;
 import org.l2j.gameserver.model.item.BodyPart;
 import org.l2j.gameserver.model.item.CommonItem;
-import org.l2j.gameserver.model.item.Weapon;
+import org.l2j.gameserver.engine.item.Weapon;
 import org.l2j.gameserver.model.item.container.Inventory;
 import org.l2j.gameserver.model.item.container.PetInventory;
 import org.l2j.gameserver.model.skills.AbnormalType;
@@ -76,7 +76,6 @@ import java.util.concurrent.Future;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.l2j.commons.configuration.Configurator.getSettings;
 import static org.l2j.commons.database.DatabaseAccess.getDAO;
 
 
@@ -360,7 +359,7 @@ public class Pet extends Summon {
             // Remove from the ground!
             target.pickupMe(this);
 
-            if (getSettings(GeneralSettings.class).saveDroppedItems()) {
+            if (GeneralSettings.saveDroppedItems()) {
                 ItemsOnGroundManager.getInstance().removeObject(target);
             }
         }
@@ -576,7 +575,7 @@ public class Pet extends Summon {
             return;
         }
 
-        if (!getSettings(CharacterSettings.class).restoreSummonOnReconnect()) {
+        if (!CharacterSettings.restoreSummonOnReconnect()) {
             _restoreSummon = false;
         }
 
@@ -622,7 +621,7 @@ public class Pet extends Summon {
 
 
                 // Dances and songs are not kept in retail.
-                if (skill.isDance() && !getSettings(CharacterSettings.class).storeDances()) {
+                if (skill.isDance() && !CharacterSettings.storeDances()) {
                     continue;
                 }
 
@@ -946,7 +945,7 @@ public class Pet extends Summon {
 
                 broadcastStatusUpdate();
 
-                final List<Integer> foodIds = getPetData().getFood();
+                var foodIds = getPetData().getFood();
                 if (foodIds.isEmpty()) {
                     if (isUncontrollable()) {
                         // Owl Monk remove PK
@@ -962,8 +961,9 @@ public class Pet extends Summon {
                 }
 
                 Item food = null;
-                for (int id : foodIds) {
-                    food = _inventory.getItemByItemId(id);
+                var it = foodIds.iterator();
+                while(it.hasNext()) {
+                    food = _inventory.getItemByItemId(it.nextInt());
                     if (food != null) {
                         break;
                     }
@@ -1005,7 +1005,7 @@ public class Pet extends Summon {
         final Pet pet = restore(control, template, owner);
         // add the pet instance to world
         pet.setTitle(owner.getName());
-        if (petTemplate.isSynchLevel() && (pet.getLevel() != owner.getLevel())) {
+        if (petTemplate.isSyncLevel() && (pet.getLevel() != owner.getLevel())) {
             final byte availableLevel = (byte) Math.min(petTemplate.getMaxLevel(), owner.getLevel());
             pet.getStats().setLevel(availableLevel);
             pet.getStats().setExp(pet.getStats().getExpForLevel(availableLevel));

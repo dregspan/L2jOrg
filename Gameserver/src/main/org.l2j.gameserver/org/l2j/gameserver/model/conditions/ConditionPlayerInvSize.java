@@ -22,9 +22,7 @@ package org.l2j.gameserver.model.conditions;
 import org.l2j.gameserver.engine.skill.api.Skill;
 import org.l2j.gameserver.model.actor.Creature;
 import org.l2j.gameserver.model.actor.instance.Player;
-import org.l2j.gameserver.model.item.ItemTemplate;
-
-import static java.util.Objects.isNull;
+import org.l2j.gameserver.engine.item.ItemTemplate;
 
 /**
  * The Class ConditionPlayerInvSize.

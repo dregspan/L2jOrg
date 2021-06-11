@@ -72,6 +72,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.ReentrantLock;
@@ -81,7 +82,6 @@ import java.util.function.Predicate;
 import static java.lang.Math.max;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.l2j.commons.configuration.Configurator.getSettings;
 import static org.l2j.commons.database.DatabaseAccess.getDAO;
 import static org.l2j.commons.util.Util.doIfNonNull;
 
@@ -218,13 +218,9 @@ public final class Item extends WorldObject {
     public void changeOwner(String process, int ownerId, Player creator, WorldObject reference) {
         changeOwner(ownerId);
 
-        var generalSettings = getSettings(GeneralSettings.class);
-        if (generalSettings.logItems()) {
-            if (!generalSettings.smallLogItems() || template.isEquipable() || template.getId() == CommonItem.ADENA) {
-                LOG_ITEMS.info("SETOWNER: {}, +{} item {} ({}), {}, {}", process, this, data.getEnchantLevel(), data.getCount(), creator, reference);
-            }
+        if (GeneralSettings.logItems() && (!GeneralSettings.smallLogItems() || template.isEquipable() || template.getId() == CommonItem.ADENA)) {
+            LOG_ITEMS.info("SETOWNER: {}, +{} item {} ({}), {}, {}", process, this, data.getEnchantLevel(), data.getCount(), creator, reference);
         }
-
         auditItem(process, getCount(), creator, reference);
     }
 
@@ -298,7 +294,7 @@ public final class Item extends WorldObject {
             return;
         }
         final long old = data.getCount();
-        final long max = data.getItemId() == CommonItem.ADENA ? getSettings(CharacterSettings.class).maxAdena() : Long.MAX_VALUE;
+        final long max = data.getItemId() == CommonItem.ADENA ? CharacterSettings.maxAdena() : Long.MAX_VALUE;
 
         if (count > 0 && data.getCount() > (max - count)) {
             setCount(max);
@@ -308,18 +304,15 @@ public final class Item extends WorldObject {
 
         storedInDb = false;
 
-        var generalSettings = getSettings(GeneralSettings.class);
-        if (generalSettings.logItems() && (process != null)) {
-            if (!generalSettings.smallLogItems() || template.isEquipable() || template.getId() == CommonItem.ADENA) {
-                LOG_ITEMS.info("CHANGE: {}, +{} item {} ({}), prev count {}, {}, {}", process, this, data.getEnchantLevel(), data.getCount(), old, creator, reference);
-            }
+        if (GeneralSettings.logItems() && process != null && (!GeneralSettings.smallLogItems() || template.isEquipable() || template.getId() == CommonItem.ADENA)){
+            LOG_ITEMS.info("CHANGE: {}, +{} item {} ({}), prev count {}, {}, {}", process, this, data.getEnchantLevel(), data.getCount(), old, creator, reference);
         }
 
         auditItem(process, count, creator, reference);
     }
 
     private void auditItem(String process, long count, Player creator, Object reference) {
-        if (nonNull(creator) && creator.isGM() && getSettings(GeneralSettings.class).auditGM()) {
+        if (nonNull(creator) && creator.isGM() && GeneralSettings.auditGM()) {
             String referenceName = "no-reference";
             if (reference instanceof WorldObject) {
                 referenceName = (((WorldObject) reference).getName() != null ? ((WorldObject) reference).getName() : "no-name");
@@ -348,7 +341,7 @@ public final class Item extends WorldObject {
     }
 
     public void updateEnchantLevel(int value) {
-        changeEnchantLevel(data.getEnchantLevel() + value);
+        changeEnchantLevel(max(0, data.getEnchantLevel() + value));
     }
 
     public void changeEnchantLevel(int enchantLevel) {
@@ -520,7 +513,7 @@ public final class Item extends WorldObject {
         if (nonNull(lifeTimeTask)) {
             lifeTimeTask.cancel(true);
         }
-        lifeTimeTask = ThreadPool.schedule(this::endOfLife, Math.max(getRemainingTime(), 2000));
+        lifeTimeTask = ThreadPool.schedule(this::endOfLife, max(getRemainingTime(), 2000));
     }
 
     @Override
@@ -534,7 +527,7 @@ public final class Item extends WorldObject {
 
     @Override
     public boolean decayMe() {
-        if (getSettings(GeneralSettings.class).saveDroppedItems()) {
+        if (GeneralSettings.saveDroppedItems()) {
             ItemsOnGroundManager.getInstance().removeObject(this);
         }
 
@@ -546,7 +539,7 @@ public final class Item extends WorldObject {
     }
 
     private boolean hasPassiveSkills() {
-        return (template.getItemType() == EtcItemType.RUNE || template.getItemType() == EtcItemType.NONE) && (data.getLoc() == ItemLocation.INVENTORY) && (data.getOwnerId() > 0) && (template.getSkills(ItemSkillType.NORMAL) != null);
+        return (template.getItemType() == EtcItemType.RUNE || template.getItemType() == EtcItemType.NONE) && (data.getLoc() == ItemLocation.INVENTORY) && (data.getOwnerId() > 0) && (template.hasSkill(ItemSkillType.NORMAL));
     }
 
     public void onBypassFeedback(Player player, String command) {
@@ -825,7 +818,7 @@ public final class Item extends WorldObject {
     }
 
     public int getSharedReuseGroup() {
-        return template.getSharedReuseGroup();
+        return template.getReuseGroup();
     }
 
     public ItemChangeType getLastChange() {
@@ -1003,6 +996,22 @@ public final class Item extends WorldObject {
         return template.getSkills(type);
     }
 
+    public Skill getFirstSkill(ItemSkillType type) {
+        return template.getFirstSkill(type);
+    }
+
+    public Skill getFirstSkill(ItemSkillType type, Comparator<ItemSkillHolder> comparator) {
+        return template.getFirstSkill(type, comparator);
+    }
+
+    public boolean hasSkills(ItemSkillType type) {
+        return template.hasSkill(type);
+    }
+
+    public boolean hasSkills(ItemSkillType type, Predicate<Skill> predicate) {
+        return template.hasSkill(type, predicate);
+    }
+
     public boolean isSelfResurrection() {
         return template instanceof EtcItem etcTemplate && etcTemplate.isSelfResurrection();
     }
@@ -1076,7 +1085,7 @@ public final class Item extends WorldObject {
 
             // Add the Item dropped in the world as a visible object
             World.getInstance().addVisibleObject(_item, _item.getWorldRegion());
-            if (getSettings(GeneralSettings.class).saveDroppedItems()) {
+            if (GeneralSettings.saveDroppedItems()) {
                 ItemsOnGroundManager.getInstance().save(_item);
             }
             _item.setDropperObjectId(0); // Set the dropper Id back to 0 so it no longer shows the drop packet

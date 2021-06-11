@@ -28,7 +28,6 @@ import org.l2j.gameserver.enums.InventorySlot;
 import org.l2j.gameserver.model.actor.instance.Player;
 import org.l2j.gameserver.model.actor.request.EnchantItemRequest;
 import org.l2j.gameserver.model.item.BodyPart;
-import org.l2j.gameserver.model.item.ItemTemplate;
 import org.l2j.gameserver.model.item.type.CrystalType;
 import org.l2j.gameserver.model.item.type.EtcItemType;
 import org.l2j.gameserver.model.skills.CommonSkill;
@@ -54,7 +53,6 @@ import java.util.*;
 import static java.lang.Math.min;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.l2j.commons.configuration.Configurator.getSettings;
 import static org.l2j.commons.util.Util.computeIfNonNull;
 import static org.l2j.commons.util.Util.doIfNonNull;
 import static org.l2j.gameserver.network.serverpackets.SystemMessage.getSystemMessage;
@@ -77,7 +75,7 @@ public class EnchantItemEngine extends GameXmlReader {
 
     @Override
     protected Path getSchemaFilePath() {
-        return getSettings(ServerSettings.class).dataPackDirectory().resolve("data/xsd/enchantment.xsd");
+        return ServerSettings.dataPackDirectory().resolve("data/xsd/enchantment.xsd");
     }
 
     @Override
@@ -361,7 +359,7 @@ public class EnchantItemEngine extends GameXmlReader {
     }
 
     private void announceEnchantment(Player player, Item item) {
-        final int minEnchantAnnounce = item.isArmor() ? getSettings(CharacterSettings.class).minEnchantAnnounceArmor() : getSettings(CharacterSettings.class).minEnchantAnnounceWeapon();
+        final int minEnchantAnnounce = item.isArmor() ? CharacterSettings.minEnchantAnnounceArmor() : CharacterSettings.minEnchantAnnounceWeapon();
         if (minEnchantAnnounce > 0 && item.getEnchantLevel() >= minEnchantAnnounce) {
 
             Broadcast.toAllOnlinePlayers(new ExItemAnnounce(ENHANCEMENT, player, item),

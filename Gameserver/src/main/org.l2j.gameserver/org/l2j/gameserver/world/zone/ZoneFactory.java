@@ -16,26 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.l2j.gameserver.model.base;
+package org.l2j.gameserver.world.zone;
+
+import org.l2j.gameserver.util.GameXmlReader;
+import org.w3c.dom.Node;
 
 /**
- * Enumerated for Social Classes.
- *
- * @author Zoey76
+ * @author JoeAlisson
  */
-public enum SocialClass {
-    VAGABOND,
-    VASSAL,
-    APPRENTICE,
-    HEIR,
-    KNIGHT,
-    ELDER,
-    BARON,
-    VISCOUNT,
-    COUNT,
-    MARQUIS,
-    DUKE,
-    GRAND_DUKE,
-    DISTINGUISHED_KING,
-    EMPEROR
+public interface ZoneFactory  {
+
+    Zone create(int id, Node zoneNode, GameXmlReader reader);
+
+    String type();
 }

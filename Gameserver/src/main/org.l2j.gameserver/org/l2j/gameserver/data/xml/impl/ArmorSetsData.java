@@ -21,7 +21,7 @@ package org.l2j.gameserver.data.xml.impl;
 import org.l2j.gameserver.engine.item.ItemEngine;
 import org.l2j.gameserver.model.ArmorSet;
 import org.l2j.gameserver.model.holders.ArmorsetSkillHolder;
-import org.l2j.gameserver.model.item.ItemTemplate;
+import org.l2j.gameserver.engine.item.ItemTemplate;
 import org.l2j.gameserver.model.stats.BaseStats;
 import org.l2j.gameserver.settings.ServerSettings;
 import org.l2j.gameserver.util.GameXmlReader;
@@ -35,8 +35,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.IntStream;
-
-import static org.l2j.commons.configuration.Configurator.getSettings;
 
 /**
  * Loads armor set bonuses.
@@ -55,7 +53,7 @@ public final class ArmorSetsData extends GameXmlReader {
 
     @Override
     protected Path getSchemaFilePath() {
-        return getSettings(ServerSettings.class).dataPackDirectory().resolve("data/xsd/armorSets.xsd");
+        return ServerSettings.dataPackDirectory().resolve("data/xsd/armorSets.xsd");
     }
 
     @Override

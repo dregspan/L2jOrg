@@ -19,14 +19,14 @@
 package org.l2j.gameserver.engine.item.container.listener;
 
 import org.l2j.gameserver.api.item.PlayerInventoryListener;
+import org.l2j.gameserver.engine.item.Item;
 import org.l2j.gameserver.engine.skill.api.Skill;
 import org.l2j.gameserver.enums.InventorySlot;
 import org.l2j.gameserver.enums.ItemSkillType;
 import org.l2j.gameserver.model.actor.instance.Player;
 import org.l2j.gameserver.model.holders.ItemSkillHolder;
-import org.l2j.gameserver.model.item.ItemTemplate;
+import org.l2j.gameserver.engine.item.ItemTemplate;
 import org.l2j.gameserver.model.item.container.Inventory;
-import org.l2j.gameserver.engine.item.Item;
 import org.l2j.gameserver.model.skills.SkillConditionScope;
 import org.l2j.gameserver.network.serverpackets.SkillCoolTime;
 import org.slf4j.Logger;
@@ -91,14 +91,14 @@ public final class ItemSkillsListener implements PlayerInventoryListener {
         });
 
         if (item.isArmor()) {
-            for (Item itm : inventory.getItems()) {
-                if (!itm.isEquipped() || (itm.getSkills(ItemSkillType.NORMAL) == null) || itm.equals(item)) {
+            for (var inventoryItem : inventory.getItems()) {
+                if (!inventoryItem.isEquipped() || !inventoryItem.hasSkills(ItemSkillType.NORMAL) || inventoryItem.equals(item)) {
                     continue;
                 }
 
-                itm.getTemplate().forEachSkill(ItemSkillType.NORMAL, holder ->
+                inventoryItem.getTemplate().forEachSkill(ItemSkillType.NORMAL, holder ->
                 {
-                    InventorySlot itmSlot = InventorySlot.fromId(itm.getLocationSlot());
+                    InventorySlot itmSlot = InventorySlot.fromId(inventoryItem.getLocationSlot());
                     if(verifySkillActiveIfAddtionalAgathion(itmSlot, holder)) {
                         return;
                     }
