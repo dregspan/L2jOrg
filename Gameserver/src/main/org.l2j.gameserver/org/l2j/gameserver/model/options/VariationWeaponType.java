@@ -25,5 +25,6 @@ package org.l2j.gameserver.model.options;
 public enum VariationWeaponType {
     WARRIOR,
     MAGE,
-    CLOAK
+    CLOAK,
+    ARMOR,
 }
