@@ -19,9 +19,9 @@
  */
 package org.l2j.gameserver.instancemanager;
 
-import org.l2j.gameserver.Config;
 import org.l2j.gameserver.data.database.dao.ItemDAO;
 import org.l2j.gameserver.model.item.auction.ItemAuctionInstance;
+import org.l2j.gameserver.settings.GeneralSettings;
 import org.l2j.gameserver.settings.ServerSettings;
 import org.l2j.gameserver.util.GameXmlReader;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public final class ItemAuctionManager extends GameXmlReader {
     private final AtomicInteger _auctionIds = new AtomicInteger(1);
 
     private ItemAuctionManager() {
-        if (!Config.ALT_ITEM_AUCTION_ENABLED) {
+        if (!GeneralSettings.enableItemAuction()) {
             LOGGER.info("Disabled by config.");
             return;
         }
@@ -100,13 +100,13 @@ public final class ItemAuctionManager extends GameXmlReader {
         }
     }
 
-    public final void shutdown() {
+    public void shutdown() {
         for (ItemAuctionInstance instance : _managerInstances.values()) {
             instance.shutdown();
         }
     }
 
-    public final ItemAuctionInstance getManagerInstance(int instanceId) {
+    public ItemAuctionInstance getManagerInstance(int instanceId) {
         return _managerInstances.get(instanceId);
     }
 

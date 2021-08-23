@@ -80,6 +80,8 @@ public class GeneralSettings {
     private static boolean enableCommunity;
     private static String bbsDefault;
     private static int worldChatPointsPerDay;
+    private static boolean enableItemAuction;
+    private static int daysToExpireItemAuction;
 
     private GeneralSettings() {
         // helper class
@@ -151,6 +153,10 @@ public class GeneralSettings {
         enableCommunity = settingsFile.getBoolean("EnableCommunityBoard", true);
         bbsDefault = settingsFile.getString("BBSDefault", "_bbshome");
         worldChatPointsPerDay = settingsFile.getInt("WorldChatPointsPerDay", 10);
+
+        enableItemAuction = settingsFile.getBoolean("AltItemAuctionEnabled", false);
+        daysToExpireItemAuction = settingsFile.getInt("AltItemAuctionExpiredAfter", 14);
+
      }
 
     public static int banChatAdenaAdsReportCount() {
@@ -339,5 +345,13 @@ public class GeneralSettings {
 
     public static int worldChatPointsPerDay() {
         return worldChatPointsPerDay;
+    }
+
+    public static boolean enableItemAuction() {
+        return enableItemAuction;
+    }
+
+    public static int daysToExpireItemAuction() {
+        return daysToExpireItemAuction;
     }
 }

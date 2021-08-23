@@ -139,9 +139,6 @@ public final class Config {
     // --------------------------------------------------
     // General Settings
     // --------------------------------------------------
-    public static boolean ALT_ITEM_AUCTION_ENABLED;
-    public static int ALT_ITEM_AUCTION_EXPIRED_AFTER;
-    public static long ALT_ITEM_AUCTION_TIME_EXTENDS_ON_BID;
 
     public static int DEFAULT_PUNISH_PARAM;
     public static boolean ONLY_GM_ITEMS_FREE;
@@ -611,10 +608,6 @@ public final class Config {
 
         // Load General config file (if exists)
         final PropertiesParser General = new PropertiesParser(GENERAL_CONFIG_FILE);
-
-        ALT_ITEM_AUCTION_ENABLED = General.getBoolean("AltItemAuctionEnabled", true);
-        ALT_ITEM_AUCTION_EXPIRED_AFTER = General.getInt("AltItemAuctionExpiredAfter", 14);
-        ALT_ITEM_AUCTION_TIME_EXTENDS_ON_BID = General.getInt("AltItemAuctionTimeExtendsOnBid", 0) * 1000L;
 
         DEFAULT_PUNISH_PARAM = General.getInt("DefaultPunishParam", 0);
         ONLY_GM_ITEMS_FREE = General.getBoolean("OnlyGMItemsFree", true);

@@ -19,7 +19,6 @@
  */
 package org.l2j.scripts.handlers.bypasshandlers;
 
-import org.l2j.gameserver.Config;
 import org.l2j.gameserver.handler.IBypassHandler;
 import org.l2j.gameserver.instancemanager.ItemAuctionManager;
 import org.l2j.gameserver.model.actor.Creature;
@@ -28,6 +27,7 @@ import org.l2j.gameserver.model.item.auction.ItemAuction;
 import org.l2j.gameserver.model.item.auction.ItemAuctionInstance;
 import org.l2j.gameserver.network.SystemMessageId;
 import org.l2j.gameserver.network.serverpackets.ExItemAuctionInfoPacket;
+import org.l2j.gameserver.settings.GeneralSettings;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -52,7 +52,7 @@ public class ItemAuctionLink implements IBypassHandler
 			return false;
 		}
 		
-		if (!Config.ALT_ITEM_AUCTION_ENABLED)
+		if (!GeneralSettings.enableItemAuction())
 		{
 			player.sendPacket(SystemMessageId.IT_IS_NOT_AN_AUCTION_PERIOD);
 			return true;
